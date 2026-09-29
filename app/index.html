@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Team Task Board</title>
+    <style>
+      :root { color-scheme: light; font-family: Georgia, "Times New Roman", serif; background: #f2f5f3; color: #18342d; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; }
+      main { width: min(680px, calc(100% - 32px)); margin: 48px auto; }
+      header { border-bottom: 2px solid #18342d; padding-bottom: 20px; }
+      h1 { margin: 0; font-size: 2.2rem; font-weight: 600; }
+      header p { margin: 8px 0 0; color: #536a63; font: 1rem/1.5 system-ui, sans-serif; }
+      form { display: flex; gap: 8px; margin: 24px 0; }
+      input { flex: 1; min-width: 0; padding: 12px; border: 1px solid #8b9e97; border-radius: 4px; font: 1rem system-ui, sans-serif; }
+      button { padding: 10px 14px; border: 0; border-radius: 4px; background: #176b59; color: white; font: 600 0.95rem system-ui, sans-serif; cursor: pointer; }
+      button:hover { background: #105443; }
+      ul { list-style: none; padding: 0; margin: 0; }
+      li { display: flex; align-items: center; gap: 12px; padding: 14px 4px; border-bottom: 1px solid #cbd5d0; font: 1rem/1.4 system-ui, sans-serif; }
+      li span { flex: 1; overflow-wrap: anywhere; }
+      li.done span { color: #687972; text-decoration: line-through; }
+      li button { background: transparent; color: #176b59; padding: 7px; }
+      li button.remove { color: #a33b2d; }
+      .empty { color: #687972; font: 1rem system-ui, sans-serif; }
+      @media (max-width: 480px) { main { margin: 28px auto; } h1 { font-size: 1.8rem; } form { flex-wrap: wrap; } form input { flex-basis: 100%; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Team Task Board</h1>
+        <p>A small release project for learning how software gets built, checked, observed, and delivered.</p>
+      </header>
+      <form id="task-form">
+        <label for="task-input" hidden>New task</label>
+        <input id="task-input" name="task" maxlength="120" placeholder="Add a task" required>
+        <button type="submit">Add task</button>
+      </form>
+      <p id="empty-state" class="empty">No tasks yet. Add one to get started.</p>
+      <ul id="task-list" aria-live="polite"></ul>
+    </main>
+    <script>
+      const storageKey = "team-task-board.tasks";
+      const form = document.querySelector("#task-form");
+      const input = document.querySelector("#task-input");
+      const list = document.querySelector("#task-list");
+      const emptyState = document.querySelector("#empty-state");
+      let tasks = JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+      function save() {
+        localStorage.setItem(storageKey, JSON.stringify(tasks));
+        render();
+      }
+
+      function render() {
+        list.replaceChildren();
+        emptyState.hidden = tasks.length > 0;
+        for (const task of tasks) {
+          const row = document.createElement("li");
+          row.className = task.done ? "done" : "";
+          const label = document.createElement("span");
+          label.textContent = task.text;
+          const toggle = document.createElement("button");
+          toggle.type = "button";
+          toggle.textContent = task.done ? "Reopen" : "Complete";
+          toggle.setAttribute("aria-label", `${toggle.textContent}: ${task.text}`);
+          toggle.addEventListener("click", () => {
+            task.done = !task.done;
+            save();
+          });
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "remove";
+          remove.textContent = "Remove";
+          remove.setAttribute("aria-label", `Remove: ${task.text}`);
+          remove.addEventListener("click", () => {
+            tasks = tasks.filter((item) => item.id !== task.id);
+            save();
+          });
+          row.append(label, toggle, remove);
+          list.append(row);
+        }
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        tasks.push({ id: crypto.randomUUID(), text, done: false });
+        input.value = "";
+        save();
+      });
+
+      render();
+    </script>
+  </body>
+</html>
