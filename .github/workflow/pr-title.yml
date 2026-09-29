@@ -1,0 +1,23 @@
+name: PR title format
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-title:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Requires a conventional title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ ! "$PR_TITLE" =~ ^(feat|fix|docs|style|refactor|perf|test|chore)\: ]]; then
+            echo "Error: Pull request title does not follow conventional format."
+            exit 1
+          fi
+          echo "Pull request title follows conventional format."
