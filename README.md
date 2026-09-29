@@ -2,7 +2,7 @@
 
 This is the one small application used throughout the course. You do not need to write the starter code before learning DevOps. Read it, run it, then use the module labs to package, test, observe, and release it.
 
-## What it does
+## What it does?
 
 The page lets one learner add, complete, and remove tasks. Tasks are saved in that browser's local storage, so they stay on that device/browser only; this is a learning demo, not a shared production task system. A tiny Python web server serves the page and exposes `/health` and `/metrics` endpoints. It writes request information to standard output so a container platform can collect the logs.
 
